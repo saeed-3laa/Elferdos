@@ -17,9 +17,9 @@ test('production CSP blocks injected scripts, varies nonces, protects responses 
  expect((await request.get('/api/search?scope=invalid&q=1')).status()).toBe(400);
  const exportDenied=await request.get('/admin/excel/export?kind=customers',{maxRedirects:0});expect([303,307]).toContain(exportDenied.status());expect(exportDenied.headers()['location']).toContain('/login');
  for(const kind of ['customers','products']){const denied=await request.get('/admin/reports/export?kind='+kind,{maxRedirects:0});expect([303,307]).toContain(denied.status());expect(denied.headers()['location']).toContain('/login');}
- const checkbox=page.locator('.catalog-filters .checkbox-label input');if(await checkbox.count()){
+ const checkbox=page.locator('.catalog-filters .checkbox-label input').filter({visible:true});
+ await expect(checkbox).toHaveCount(1);
   const difference=await checkbox.evaluate(input=>{const rect=input.getBoundingClientRect(),label=input.closest('label')!;const text=[...label.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent?.trim());if(!text)throw new Error('Missing checkbox label');const range=document.createRange();range.selectNodeContents(text);const r=range.getBoundingClientRect();return Math.abs(rect.y+rect.height/2-r.y-r.height/2);});expect(difference).toBeLessThan(4);
- }
 });
 
 test('direct Server Action replay is denied for customers and hostile origins while the authorized control succeeds',async({page,browser,baseURL})=>{
