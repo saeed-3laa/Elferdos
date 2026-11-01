@@ -42,3 +42,11 @@ Check homepage/logo, staff verified-email/TOTP sign-in, customer phone login, ac
 Public launch still requires dependency-risk resolution, monitoring and backup/storage restore evidence. This testing setup does not claim production readiness.
 
 Sources: https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/ ; https://www.netlify.com/blog/introducing-netlify-free-plan/ ; https://supabase.com/pricing ; https://supabase.com/docs/guides/auth/passwords
+
+## Actual progress — 2 November 2026
+
+Source uploaded to GitHub main, commit56a36fa687ea545a12f71a87c76789bead65c5b4. The local checkout now tracks origin/main; the earlier initial local master commit is retained. Git transport upload timed out twice; the authenticated GitHub API upload succeeded and was verified.
+
+Created the dedicated free project elferdos-staging (xzljxnzwgzmqeyyvgkxs) in the user-selected Elferdos organization, Frankfurt region. The provider quoted $0/month for creation. Inspected the empty public schema, then applied001and002–030 after explicit user approval of cloud test changes. Original migration versions are recorded. An additional deployment-tool record20261101233817retains the complete002–030 bootstrap payload; automatic review rejected its deletion. It remains intact, with a matching no-op tracking file in this repo so future CLI migration comparisons stay aligned. No existing local migration file/history was rewritten and this marker was not applied to the local database during deployment setup.
+
+Read-only hosted checks after schema setup:0profiles,0orders,0products,0retired inventory role permissions. This confirms an empty staging environment, not a working app/login. No local passwords, Auth accounts, orders or product images have been copied. Host configuration, new verified owner/MFA and hosted smoke tests remain pending until the next recorded verification.
