@@ -1,0 +1,4 @@
+import Link from "next/link";
+import {requireStaff} from "@/server/auth/staff";
+import {OwnCredentialsForm} from "@/components/staff-account-forms";
+export default async function Page(){const {profile,access}=await requireStaff();return <><h1>حسابي وكلمة المرور</h1><section className="form-panel"><h2>{profile.full_name}</h2><p>بريد الإدارة: <bdi>{profile.login_email??"لم يُربط بعد"}</bdi></p><p><Link className="text-link" href="/security/email">{access.email_ready?"تغيير بريد الإدارة":"تأكيد وربط بريد الإدارة"}</Link></p><p>رقم الموبايل: <bdi>{profile.phone}</bdi></p></section><p className="mfa-status">التحقق بخطوتين: {access.mfa_verified?"تم التحقق لهذه الجلسة":"غير مكتمل لهذه الجلسة"}</p><p><Link className="text-link" href="/security/mfa">تطبيق التحقق بخطوتين</Link></p><OwnCredentialsForm owner={access.role==="OWNER"}/></>;}

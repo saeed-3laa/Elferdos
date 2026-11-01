@@ -1,0 +1,4 @@
+"use client";
+import {useActionState} from "react";
+import {linkStaffEmail} from "@/app/security/email/actions";
+export function StaffEmailForm({email}:{email:string}){const [state,action,pending]=useActionState(linkStaffEmail,{});return <form action={action} className="account-form form-panel">{state.error&&<p role="alert" className="form-error">{state.error}</p>}{state.success&&<p role="status" className="form-success">{state.success}</p>}<label>البريد الإلكتروني<input name="email" type="email" autoComplete="email" defaultValue={email} dir="ltr" required maxLength={254}/></label><label>كلمة المرور الحالية<input name="password" type="password" autoComplete="current-password" required maxLength={128}/></label><button className="button" disabled={pending}>{pending?"جارٍ طلب التحقق…":"إرسال رابط تأكيد البريد"}</button></form>}

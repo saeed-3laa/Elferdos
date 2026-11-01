@@ -1,0 +1,1041 @@
+{
+  "generated": "2026-10-31",
+  "method": "Source inventory; guards listed are evidence to review, not proof of complete runtime authorization.",
+  "actions": [
+    {
+      "file": "src/app/account/actions.ts",
+      "exports": [
+        "updateProfileAction",
+        "saveAddressAction",
+        "deleteAddressAction"
+      ],
+      "guards": [
+        "requireCustomer()"
+      ]
+    },
+    {
+      "file": "src/app/account/notifications/actions.ts",
+      "exports": [
+        "markRead"
+      ],
+      "guards": [
+        "requireCustomer()"
+      ]
+    },
+    {
+      "file": "src/app/account/orders/actions.ts",
+      "exports": [
+        "cancelMyOrder"
+      ],
+      "guards": [
+        "requireCustomer()"
+      ]
+    },
+    {
+      "file": "src/app/admin/actions.ts",
+      "exports": [
+        "savePaymentSettings",
+        "saveReference",
+        "saveProduct",
+        "archiveProduct",
+        "saveUnit"
+      ],
+      "guards": [
+        "requireStaff(\"settings.write\")",
+        "requireStaff(kind === \"zone\" ? \"settings.write\" : \"catalog.write\")",
+        "requireStaff(\"catalog.write\")"
+      ]
+    },
+    {
+      "file": "src/app/admin/customers/actions.ts",
+      "exports": [
+        "manageStaff",
+        "manageCustomer",
+        "recoverAccount",
+        "savePermissions",
+        "saveManagedProfile"
+      ],
+      "guards": [
+        "requireStaff(\"staff.manage\")"
+      ]
+    },
+    {
+      "file": "src/app/admin/excel/actions.ts",
+      "exports": [
+        "previewImport",
+        "applyImport"
+      ],
+      "guards": [
+        "requireStaff(\"catalog.write\")",
+        "requireStaff()"
+      ]
+    },
+    {
+      "file": "src/app/admin/image-actions.ts",
+      "exports": [
+        "uploadProductImage",
+        "removeProductImage"
+      ],
+      "guards": [
+        "requireStaff(\"catalog.write\")"
+      ]
+    },
+    {
+      "file": "src/app/admin/order-actions.ts",
+      "exports": [
+        "scheduleDelivery",
+        "transitionOrder",
+        "previewAmendment",
+        "saveAmendment",
+        "recordPayment"
+      ],
+      "guards": [
+        "requireStaff(\"orders.write\")"
+      ]
+    },
+    {
+      "file": "src/app/admin/pricing/actions.ts",
+      "exports": [
+        "savePricingRule",
+        "previewPricing"
+      ],
+      "guards": [
+        "requireStaff(\"catalog.write\")"
+      ]
+    },
+    {
+      "file": "src/app/admin/staff/actions.ts",
+      "exports": [
+        "createStaff",
+        "changeOwnCredentials",
+        "resendStaffConfirmation"
+      ],
+      "guards": [
+        "requireStaff(\"staff.manage\")",
+        "requireAccount()"
+      ]
+    },
+    {
+      "file": "src/app/auth-actions.ts",
+      "exports": [
+        "loginAction",
+        "staffLoginAction",
+        "registerAction",
+        "logoutAction"
+      ],
+      "guards": []
+    },
+    {
+      "file": "src/app/cart/actions.ts",
+      "exports": [
+        "useShopAddress",
+        "previewOrder",
+        "findSubmittedRequest",
+        "placeOrder"
+      ],
+      "guards": [
+        "requireCustomer()"
+      ]
+    },
+    {
+      "file": "src/app/returns/actions.ts",
+      "exports": [
+        "requestReturn",
+        "createAdminReturn",
+        "reviewReturn"
+      ],
+      "guards": [
+        "requireCustomer()",
+        "requireStaff(\"orders.write\")"
+      ]
+    },
+    {
+      "file": "src/app/security/email/actions.ts",
+      "exports": [
+        "linkStaffEmail",
+        "finishStaffEmail"
+      ],
+      "guards": [
+        "requireAccount()"
+      ]
+    },
+    {
+      "file": "src/app/security/mfa/actions.ts",
+      "exports": [
+        "enrollMfa",
+        "verifyMfa"
+      ],
+      "guards": [
+        "requireAccount()"
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "file": "src/app/admin/excel/export/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": [
+        "requireStaff()",
+        "requireStaff(\"catalog.write\")",
+        "requireStaff(\"reports.read\")",
+        "requireStaff(config.permission)"
+      ],
+      "authTokenExchange": false
+    },
+    {
+      "file": "src/app/admin/reports/export/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": [
+        "requireStaff(kind===\"customers\"?\"customers.read\":\"catalog.read\")"
+      ],
+      "authTokenExchange": false
+    },
+    {
+      "file": "src/app/api/notifications/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": [],
+      "authTokenExchange": false
+    },
+    {
+      "file": "src/app/api/search/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": [],
+      "authTokenExchange": false
+    },
+    {
+      "file": "src/app/auth/callback/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": [],
+      "authTokenExchange": true
+    },
+    {
+      "file": "src/app/auth/confirm/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": [],
+      "authTokenExchange": true
+    },
+    {
+      "file": "src/app/invoices/[id]/pdf/route.ts",
+      "methods": [
+        "GET"
+      ],
+      "guards": [
+        "requireAccount()"
+      ],
+      "authTokenExchange": false
+    }
+  ],
+  "pages": [
+    {
+      "file": "src/app/account/addresses/page.tsx",
+      "guards": [
+        "requireCustomer()"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/account/notifications/page.tsx",
+      "guards": [
+        "requireCustomer()"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/account/orders/page.tsx",
+      "guards": [],
+      "hasDataOperations": false
+    },
+    {
+      "file": "src/app/account/orders/[id]/page.tsx",
+      "guards": [],
+      "hasDataOperations": false
+    },
+    {
+      "file": "src/app/account/page.tsx",
+      "guards": [
+        "requireAccount()"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/account/security/page.tsx",
+      "guards": [
+        "requireCustomer()"
+      ],
+      "hasDataOperations": false
+    },
+    {
+      "file": "src/app/admin/audit/page.tsx",
+      "guards": [
+        "requireStaff(\"audit.read\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/categories/page.tsx",
+      "guards": [
+        "requireStaff(\"catalog.write\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/customers/page.tsx",
+      "guards": [
+        "requireStaff(\"customers.read\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/customers/[id]/page.tsx",
+      "guards": [
+        "requireStaff(\"customers.read\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/excel/page.tsx",
+      "guards": [
+        "requireStaff()"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/orders/page.tsx",
+      "guards": [],
+      "hasDataOperations": false
+    },
+    {
+      "file": "src/app/admin/orders/[id]/edit/page.tsx",
+      "guards": [
+        "requireStaff(\"orders.write\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/orders/[id]/page.tsx",
+      "guards": [],
+      "hasDataOperations": false
+    },
+    {
+      "file": "src/app/admin/page.tsx",
+      "guards": [
+        "requireStaff()"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/pricing/page.tsx",
+      "guards": [
+        "requireStaff(\"catalog.write\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/products/new/page.tsx",
+      "guards": [
+        "requireStaff(\"catalog.write\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/products/page.tsx",
+      "guards": [
+        "requireStaff(\"catalog.read\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/products/[id]/page.tsx",
+      "guards": [
+        "requireStaff(\"catalog.read\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/profile/page.tsx",
+      "guards": [
+        "requireStaff()"
+      ],
+      "hasDataOperations": false
+    },
+    {
+      "file": "src/app/admin/reports/page.tsx",
+      "guards": [
+        "requireStaff(\"reports.read\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/returns/page.tsx",
+      "guards": [
+        "requireStaff(\"orders.read\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/settings/page.tsx",
+      "guards": [
+        "requireStaff(\"settings.write\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/staff/new/page.tsx",
+      "guards": [
+        "requireStaff(\"staff.manage\")"
+      ],
+      "hasDataOperations": false
+    },
+    {
+      "file": "src/app/admin/staff/page.tsx",
+      "guards": [
+        "requireStaff(\"staff.manage\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/staff/[id]/page.tsx",
+      "guards": [
+        "requireStaff(\"staff.manage\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/admin/zones/page.tsx",
+      "guards": [
+        "requireStaff(\"settings.write\")"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/cart/page.tsx",
+      "guards": [
+        "requireCustomer()"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/help/password/page.tsx",
+      "guards": [],
+      "hasDataOperations": false
+    },
+    {
+      "file": "src/app/invoices/[id]/page.tsx",
+      "guards": [],
+      "hasDataOperations": false
+    },
+    {
+      "file": "src/app/login/page.tsx",
+      "guards": [],
+      "hasDataOperations": false
+    },
+    {
+      "file": "src/app/page.tsx",
+      "guards": [],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/register/page.tsx",
+      "guards": [],
+      "hasDataOperations": false
+    },
+    {
+      "file": "src/app/security/email/page.tsx",
+      "guards": [
+        "requireAccount()"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/security/mfa/page.tsx",
+      "guards": [
+        "requireAccount()"
+      ],
+      "hasDataOperations": true
+    },
+    {
+      "file": "src/app/staff/login/page.tsx",
+      "guards": [],
+      "hasDataOperations": false
+    }
+  ],
+  "dataModules": [
+    {
+      "file": "src/server/auth/credential-assurance.ts",
+      "guards": [],
+      "serverOnly": true
+    },
+    {
+      "file": "src/server/auth/customer.ts",
+      "guards": [
+        "requireAccount()"
+      ],
+      "serverOnly": true
+    },
+    {
+      "file": "src/server/auth/rate-limit.ts",
+      "guards": [],
+      "serverOnly": true
+    },
+    {
+      "file": "src/server/auth/staff.ts",
+      "guards": [
+        "requireAccount()",
+        "requireStaff(permission?: string)"
+      ],
+      "serverOnly": true
+    },
+    {
+      "file": "src/server/auth/workload-limit.ts",
+      "guards": [],
+      "serverOnly": true
+    },
+    {
+      "file": "src/server/excel/workbook.ts",
+      "guards": [],
+      "serverOnly": true
+    },
+    {
+      "file": "src/server/orders/invoice.ts",
+      "guards": [
+        "requireAccount()",
+        "requireStaff(\"orders.read\")",
+        "requireCustomer()"
+      ],
+      "serverOnly": true
+    },
+    {
+      "file": "src/server/pdf/invoice-pdf.ts",
+      "guards": [],
+      "serverOnly": true
+    },
+    {
+      "file": "src/server/repositories/catalog.ts",
+      "guards": [],
+      "serverOnly": true
+    },
+    {
+      "file": "src/server/storage/encode-image.ts",
+      "guards": [],
+      "serverOnly": true
+    }
+  ],
+  "sql": [
+    {
+      "file": "supabase/migrations/202610250001_foundation.sql",
+      "function": "private.has_permission"
+    },
+    {
+      "file": "supabase/migrations/202610250001_foundation.sql",
+      "function": "private.is_active_customer"
+    },
+    {
+      "file": "supabase/migrations/202610250001_foundation.sql",
+      "function": "private.on_auth_user_created"
+    },
+    {
+      "file": "supabase/migrations/202610250001_foundation.sql",
+      "function": "private.normalize_search"
+    },
+    {
+      "file": "supabase/migrations/202610250001_foundation.sql",
+      "function": "private.initialize_inventory"
+    },
+    {
+      "file": "supabase/migrations/202610250001_foundation.sql",
+      "function": "private.audit_change"
+    },
+    {
+      "file": "supabase/migrations/202610250001_foundation.sql",
+      "function": "public.adjust_inventory"
+    },
+    {
+      "file": "supabase/migrations/202610250001_foundation.sql",
+      "function": "public.browse_catalog"
+    },
+    {
+      "file": "supabase/migrations/202610250002_customer_accounts.sql",
+      "function": "private.on_auth_user_created"
+    },
+    {
+      "file": "supabase/migrations/202610250002_customer_accounts.sql",
+      "function": "public.consume_auth_limit"
+    },
+    {
+      "file": "supabase/migrations/202610250002_customer_accounts.sql",
+      "function": "public.save_customer_address"
+    },
+    {
+      "file": "supabase/migrations/202610250002_customer_accounts.sql",
+      "function": "public.delete_customer_address"
+    },
+    {
+      "file": "supabase/migrations/202610250003_admin_catalog.sql",
+      "function": "private.bump_revision"
+    },
+    {
+      "file": "supabase/migrations/202610250003_admin_catalog.sql",
+      "function": "public.get_staff_access"
+    },
+    {
+      "file": "supabase/migrations/202610250003_admin_catalog.sql",
+      "function": "public.save_admin_reference"
+    },
+    {
+      "file": "supabase/migrations/202610250003_admin_catalog.sql",
+      "function": "public.save_admin_product"
+    },
+    {
+      "file": "supabase/migrations/202610250003_admin_catalog.sql",
+      "function": "public.archive_admin_product"
+    },
+    {
+      "file": "supabase/migrations/202610250003_admin_catalog.sql",
+      "function": "public.save_admin_unit"
+    },
+    {
+      "file": "supabase/migrations/202610250003_admin_catalog.sql",
+      "function": "public.set_inventory_by_unit"
+    },
+    {
+      "file": "supabase/migrations/202610250003_admin_catalog.sql",
+      "function": "public.save_admin_settings"
+    },
+    {
+      "file": "supabase/migrations/202610250003_admin_catalog.sql",
+      "function": "public.admin_products"
+    },
+    {
+      "file": "supabase/migrations/202610250004_automatic_product_codes.sql",
+      "function": "public.save_admin_product"
+    },
+    {
+      "file": "supabase/migrations/202610260005_product_images.sql",
+      "function": "public.commit_product_image"
+    },
+    {
+      "file": "supabase/migrations/202610260005_product_images.sql",
+      "function": "public.browse_catalog"
+    },
+    {
+      "file": "supabase/migrations/202610260006_orders_pricing.sql",
+      "function": "private.best_price"
+    },
+    {
+      "file": "supabase/migrations/202610260006_orders_pricing.sql",
+      "function": "public.save_pricing_rule"
+    },
+    {
+      "file": "supabase/migrations/202610260006_orders_pricing.sql",
+      "function": "private.order_quote"
+    },
+    {
+      "file": "supabase/migrations/202610260006_orders_pricing.sql",
+      "function": "public.quote_order"
+    },
+    {
+      "file": "supabase/migrations/202610260006_orders_pricing.sql",
+      "function": "public.submit_order"
+    },
+    {
+      "file": "supabase/migrations/202610260006_orders_pricing.sql",
+      "function": "public.transition_order"
+    },
+    {
+      "file": "supabase/migrations/202610260006_orders_pricing.sql",
+      "function": "public.record_payment"
+    },
+    {
+      "file": "supabase/migrations/202610260006_orders_pricing.sql",
+      "function": "public.admin_orders"
+    },
+    {
+      "file": "supabase/migrations/202610260007_operations.sql",
+      "function": "private.is_active_customer"
+    },
+    {
+      "file": "supabase/migrations/202610260007_operations.sql",
+      "function": "private.has_permission"
+    },
+    {
+      "file": "supabase/migrations/202610260007_operations.sql",
+      "function": "public.manage_staff"
+    },
+    {
+      "file": "supabase/migrations/202610260007_operations.sql",
+      "function": "public.manage_customer"
+    },
+    {
+      "file": "supabase/migrations/202610260007_operations.sql",
+      "function": "public.save_role_permissions"
+    },
+    {
+      "file": "supabase/migrations/202610260007_operations.sql",
+      "function": "public.complete_account_recovery"
+    },
+    {
+      "file": "supabase/migrations/202610260007_operations.sql",
+      "function": "public.save_payment_settings"
+    },
+    {
+      "file": "supabase/migrations/202610260007_operations.sql",
+      "function": "public.preview_price"
+    },
+    {
+      "file": "supabase/migrations/202610260007_operations.sql",
+      "function": "public.sales_report"
+    },
+    {
+      "file": "supabase/migrations/202610260007_operations.sql",
+      "function": "public.preview_import"
+    },
+    {
+      "file": "supabase/migrations/202610260007_operations.sql",
+      "function": "public.import_context"
+    },
+    {
+      "file": "supabase/migrations/202610260007_operations.sql",
+      "function": "public.apply_import"
+    },
+    {
+      "file": "supabase/migrations/202610260008_catalog_finishing.sql",
+      "function": "public.browse_catalog"
+    },
+    {
+      "file": "supabase/migrations/202610260009_security_limits.sql",
+      "function": "public.submit_order"
+    },
+    {
+      "file": "supabase/migrations/202610260010_role_guards.sql",
+      "function": "public.save_role_permissions"
+    },
+    {
+      "file": "supabase/migrations/202610260011_catalog_query_plan.sql",
+      "function": "public.browse_catalog"
+    },
+    {
+      "file": "supabase/migrations/202610260012_catalog_indexes.sql",
+      "function": "public.browse_catalog"
+    },
+    {
+      "file": "supabase/migrations/202610260013_report_identity.sql",
+      "function": "public.sales_report"
+    },
+    {
+      "file": "supabase/migrations/202610260014_search_suggestions.sql",
+      "function": "private.search_prefix"
+    },
+    {
+      "file": "supabase/migrations/202610260014_search_suggestions.sql",
+      "function": "public.search_suggestions"
+    },
+    {
+      "file": "supabase/migrations/202610260015_shop_delivery_address.sql",
+      "function": "private.sync_shop_address"
+    },
+    {
+      "file": "supabase/migrations/202610260015_shop_delivery_address.sql",
+      "function": "private.on_shop_address_changed"
+    },
+    {
+      "file": "supabase/migrations/202610260015_shop_delivery_address.sql",
+      "function": "public.save_shop_delivery_zone"
+    },
+    {
+      "file": "supabase/migrations/202610270016_simple_order_workflow.sql",
+      "function": "private.order_delivery_policy"
+    },
+    {
+      "file": "supabase/migrations/202610270016_simple_order_workflow.sql",
+      "function": "public.submit_order"
+    },
+    {
+      "file": "supabase/migrations/202610270016_simple_order_workflow.sql",
+      "function": "public.transition_order"
+    },
+    {
+      "file": "supabase/migrations/202610270016_simple_order_workflow.sql",
+      "function": "public.complete_order"
+    },
+    {
+      "file": "supabase/migrations/202610270017_order_amendments.sql",
+      "function": "public.mark_notification_read"
+    },
+    {
+      "file": "supabase/migrations/202610270017_order_amendments.sql",
+      "function": "public.notification_summary"
+    },
+    {
+      "file": "supabase/migrations/202610270017_order_amendments.sql",
+      "function": "private.amendment_quote"
+    },
+    {
+      "file": "supabase/migrations/202610270017_order_amendments.sql",
+      "function": "public.preview_order_amendment"
+    },
+    {
+      "file": "supabase/migrations/202610270017_order_amendments.sql",
+      "function": "public.amend_order"
+    },
+    {
+      "file": "supabase/migrations/202610270018_catalog_offers.sql",
+      "function": "private.browse_catalog_standard"
+    },
+    {
+      "file": "supabase/migrations/202610270018_catalog_offers.sql",
+      "function": "public.browse_catalog"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "private.classify_staff"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "private.is_active_account"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "private.is_active_customer"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "private.has_permission"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "public.manage_staff"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "public.manage_customer"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "public.provision_staff"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "public.complete_account_recovery"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "public.finish_own_credentials"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "public.search_suggestions"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "public.save_managed_profile"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "public.get_staff_access"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "public.save_customer_address"
+    },
+    {
+      "file": "supabase/migrations/202610280019_separate_staff_accounts.sql",
+      "function": "public.delete_customer_address"
+    },
+    {
+      "file": "supabase/migrations/202610280020_admin_mfa.sql",
+      "function": "private.admin_mfa_satisfied"
+    },
+    {
+      "file": "supabase/migrations/202610280020_admin_mfa.sql",
+      "function": "private.has_permission"
+    },
+    {
+      "file": "supabase/migrations/202610280020_admin_mfa.sql",
+      "function": "public.get_staff_access"
+    },
+    {
+      "file": "supabase/migrations/202610280020_admin_mfa.sql",
+      "function": "public.deployment_security_status"
+    },
+    {
+      "file": "supabase/migrations/202610280021_mfa_readiness.sql",
+      "function": "public.deployment_security_status"
+    },
+    {
+      "file": "supabase/migrations/202610280022_staff_email_login.sql",
+      "function": "private.classify_staff"
+    },
+    {
+      "file": "supabase/migrations/202610280022_staff_email_login.sql",
+      "function": "private.staff_email_ready"
+    },
+    {
+      "file": "supabase/migrations/202610280022_staff_email_login.sql",
+      "function": "private.has_permission"
+    },
+    {
+      "file": "supabase/migrations/202610280022_staff_email_login.sql",
+      "function": "public.get_staff_access"
+    },
+    {
+      "file": "supabase/migrations/202610280022_staff_email_login.sql",
+      "function": "public.provision_email_staff"
+    },
+    {
+      "file": "supabase/migrations/202610280022_staff_email_login.sql",
+      "function": "public.request_staff_email"
+    },
+    {
+      "file": "supabase/migrations/202610280022_staff_email_login.sql",
+      "function": "public.finish_staff_email_link"
+    },
+    {
+      "file": "supabase/migrations/202610280022_staff_email_login.sql",
+      "function": "public.deployment_security_status"
+    },
+    {
+      "file": "supabase/migrations/202610280023_enrolled_mfa_enforcement.sql",
+      "function": "private.admin_mfa_required"
+    },
+    {
+      "file": "supabase/migrations/202610280023_enrolled_mfa_enforcement.sql",
+      "function": "private.admin_mfa_satisfied"
+    },
+    {
+      "file": "supabase/migrations/202610280023_enrolled_mfa_enforcement.sql",
+      "function": "public.get_staff_access"
+    },
+    {
+      "file": "supabase/migrations/202610280024_order_delivery_day.sql",
+      "function": "public.schedule_order_delivery"
+    },
+    {
+      "file": "supabase/migrations/202610290025_free_delivery.sql",
+      "function": "public.save_admin_reference"
+    },
+    {
+      "file": "supabase/migrations/202610290025_free_delivery.sql",
+      "function": "public.save_admin_settings"
+    },
+    {
+      "file": "supabase/migrations/202610290025_free_delivery.sql",
+      "function": "private.order_quote"
+    },
+    {
+      "file": "supabase/migrations/202610290025_free_delivery.sql",
+      "function": "private.amendment_quote"
+    },
+    {
+      "file": "supabase/migrations/202610290026_returns_and_cancellation.sql",
+      "function": "private.return_quote"
+    },
+    {
+      "file": "supabase/migrations/202610290026_returns_and_cancellation.sql",
+      "function": "public.request_order_return"
+    },
+    {
+      "file": "supabase/migrations/202610290026_returns_and_cancellation.sql",
+      "function": "public.review_order_return"
+    },
+    {
+      "file": "supabase/migrations/202610290026_returns_and_cancellation.sql",
+      "function": "public.create_admin_return"
+    },
+    {
+      "file": "supabase/migrations/202610290026_returns_and_cancellation.sql",
+      "function": "public.cancel_customer_order"
+    },
+    {
+      "file": "supabase/migrations/202610290026_returns_and_cancellation.sql",
+      "function": "public.record_payment"
+    },
+    {
+      "file": "supabase/migrations/202610290027_default_address_export_and_return_limits.sql",
+      "function": "public.request_order_return"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.save_product_availability"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.save_product_with_availability"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "private.browse_catalog_standard"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.browse_catalog"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "private.order_quote"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.submit_order"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.transition_order"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "private.amendment_quote"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.amend_order"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.cancel_customer_order"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.review_order_return"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.search_suggestions"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.save_admin_unit"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.sales_report"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.preview_import"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.import_context"
+    },
+    {
+      "file": "supabase/migrations/202610310028_manual_product_availability.sql",
+      "function": "public.apply_import"
+    },
+    {
+      "file": "supabase/migrations/202610310029_partial_phone_search.sql",
+      "function": "public.search_suggestions"
+    }
+  ]
+}

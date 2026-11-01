@@ -1,0 +1,7 @@
+import Link from "next/link";
+import {notFound} from "next/navigation";
+import {z} from "zod";
+import {requireStaff} from "@/server/auth/staff";
+import {CustomerAccessForm,RecoveryForm,ManagedProfileForm} from "@/components/customer-admin-forms";
+import {formatEgp} from "@/domain/money";
+export default async function Page({params}:{params:Promise<{id:string}>}){const {client,access,user}=await requireStaff("customers.read");const {id}=await params;if(!z.uuid().safeParse(id).success)notFound();const profile=await client.from("profiles").select("*").eq("id",id).eq("account_kind","CUSTOMER").maybeSingle();if(profile.error)throw new Error("CUSTOMER_UNAVAILABLE");if(!profile.data)notFound();const p=profile.data;const owner=access.permissions.includes("staff.manage");const orders=access.permissions.includes("orders.read")?await client.from("orders").select("id,number,total").eq("customer_id",id).order("number",{ascending:false}).limit(24):{data:[],error:null};return <><h1>{p.full_name}</h1><section className="form-panel"><p>{p.shop_name} · <bdi>{p.phone}</bdi></p><p>{p.area} — {p.delivery_address}</p></section><section className="admin-section"><h2>أحدث طلبات العميل (حتى ٢٤)</h2>{orders.data?.map(o=><p key={o.id}><Link className="text-link" href={`/admin/orders/${o.id}`}>طلب {o.number}</Link> — {formatEgp(o.total)}</p>)}</section>{owner&&id!==user.id&&<div className="reference-grid"><ManagedProfileForm profile={p}/><CustomerAccessForm target={id} active={p.active}/><RecoveryForm target={id}/></div>}</>;}

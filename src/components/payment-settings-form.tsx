@@ -1,0 +1,4 @@
+"use client";
+import {useActionState} from "react";
+import {savePaymentSettings} from "@/app/admin/actions";
+export function PaymentSettingsForm({revision,recipient}:{revision:number;recipient:string}){const [state,action,pending]=useActionState(savePaymentSettings,{});return <form action={action} className="account-form form-panel"><h2>بيانات استقبال إنستا باي</h2><input name="revision" type="hidden" value={revision}/>{state.error&&<p role="alert" className="form-error">{state.error}</p>}{state.success&&<p role="status">{state.success}</p>}<label>الحساب أو رقم الاستقبال والتعليمات<textarea name="recipient" maxLength={300} defaultValue={recipient}/></label><p className="field-hint">تظهر للعملاء المسجلين عند اختيار إنستا باي. اتركها فارغة إن لم تجهز بيانات الاستقبال بعد.</p><button className="button" disabled={pending}>حفظ بيانات إنستا باي</button></form>;}

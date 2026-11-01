@@ -1,0 +1,32 @@
+import {notFound} from "next/navigation";
+import Link from "next/link";
+import {z} from "zod";
+import {requireCustomer} from "@/server/auth/customer";
+import {requireStaff} from "@/server/auth/staff";
+import {formatEgp} from "@/domain/money";
+import {orderStatusLabel,type AmendmentQuote} from "@/domain/orders";
+import {AmendmentSummary} from "@/components/amendment-summary";
+import {OrderTransition,PaymentForm,Reorder} from "@/components/order-forms";
+import {Invoice,InvoiceLinks} from "@/components/invoice";
+import {ReturnForm,ReviewReturnForm,CancelOrderForm} from "@/components/order-return-forms";
+import {DeliveryScheduleForm} from "@/components/delivery-schedule-form";
+import {deliveryChoices,formatDeliveryDate} from "@/domain/delivery";
+export async function OrderDetails({id,admin=false}:{id:string;admin?:boolean}){
+ if(!z.uuid().safeParse(id).success)notFound();const session=admin?await requireStaff("orders.read"):await requireCustomer();const client=session.client;
+ const [result,lines,events,payments,amendments]=await Promise.all([client.from("orders").select("*").eq("id",id).maybeSingle(),client.from("order_items").select("*").eq("order_id",id).order("id").limit(100),client.from("order_events").select("id,status,note,created_at").eq("order_id",id).order("id",{ascending:false}).limit(150),client.from("order_payments").select("id,amount,method,reference,created_at").eq("order_id",id).order("created_at").limit(200),client.from("order_amendments").select("id,changes,reason,created_at,before_total:before_data->total,after_total:after_data->total,after_fee:after_data->delivery_fee").eq("order_id",id).order("revision",{ascending:false}).limit(20)]);
+ if(result.error||lines.error||events.error||payments.error||amendments.error)throw new Error("ORDER_UNAVAILABLE");if(!result.data)notFound();const o=result.data;const paid=payments.data.reduce((sum,p)=>sum+p.amount,0);const canWrite=admin&&(await requireStaff("orders.read")).access.permissions.includes("orders.write");
+ const returns=await client.from("order_returns").select("id,status,reason,lines,amount,created_at,review_note").eq("order_id",id).order("created_at",{ascending:false}).limit(100);if(returns.error)throw new Error("RETURNS_UNAVAILABLE");const pendingReturn=returns.data.some(r=>r.status==="REQUESTED");
+ const amendmentRows=amendments.data as unknown as {id:string;changes:AmendmentQuote["changes"];reason:string;created_at:string;before_total:number;after_total:number;after_fee:number}[];
+ return <><div className="account-title"><h1>طلب رقم {o.number}</h1><p>{orderStatusLabel(o.status)} · {new Date(o.created_at).toLocaleString("ar-EG",{timeZone:"Africa/Cairo"})}</p>{canWrite&&["CONFIRMED","READY"].includes(o.status)&&<Link className="button button-secondary" href={`/admin/orders/${id}/edit`}>تعديل أصناف وكميات الطلب</Link>}</div>
+ <InvoiceLinks id={id}/>{o.notes&&<p className="field-hint">ملاحظات الطلب: {o.notes}</p>}<Invoice invoice={{id:o.id,number:o.number,status:o.status,created_at:o.created_at,delivery_date:o.delivery_date,customer:o.customer_snapshot,address:o.address_snapshot,base_total:o.base_total,subtotal:o.subtotal,delivery_fee:o.delivery_fee,total:o.total,paid,items:lines.data}}/>
+ {!admin&&o.status==="CONFIRMED"&&<CancelOrderForm id={id} revision={o.revision}/>}
+ <section className="admin-section delivery-schedule"><h2>موعد التوصيل المحدد</h2><p>{formatDeliveryDate(o.delivery_date)}</p>{canWrite&&["CONFIRMED","READY"].includes(o.status)&&<DeliveryScheduleForm id={id} revision={o.revision} date={o.delivery_date} choices={deliveryChoices()}/>}</section>
+ {!!amendmentRows.length&&<section className="admin-section amendment-history"><h2>تعديلات الطلب — آخر ٢٠ تعديل</h2>{amendmentRows.map(amendment=><section className="form-panel" key={amendment.id}><h3>تم تعديل الطلب</h3><p>{amendment.reason}</p><small>{new Date(amendment.created_at).toLocaleString("ar-EG",{timeZone:"Africa/Cairo"})}</small><AmendmentSummary quote={{changes:amendment.changes,before:{total:amendment.before_total},after:{total:amendment.after_total,delivery_fee:amendment.after_fee}}}/></section>)}</section>}
+ <section className="admin-section"><h2>تاريخ الطلب</h2>{events.data.toReversed().map(e=><p key={e.id}>{orderStatusLabel(e.status)} — {e.note==="تم تسجيل الطلب على بيلا وتجهيزه"?"تم تجهيز الطلب":e.note} <small>{new Date(e.created_at).toLocaleString("ar-EG",{timeZone:"Africa/Cairo"})}</small></p>)}</section>
+ <section className="admin-section"><h2>حركات التحصيل والرد</h2>{!payments.data.length&&<p>لم تسجل حركات مالية بعد.</p>}{payments.data.map(p=><p key={p.id}>{p.amount<0?"رد":"تحصيل"}: {formatEgp(Math.abs(p.amount))} — {p.method==="cash"?"كاش":"إنستا باي"} — {p.reference}</p>)}</section>
+ {admin&&<div className="form-links"><Link href={`/admin/excel/export?kind=orders&order=${id}`}>تصدير بيانات الطلب Excel</Link><Link href={`/admin/excel/export?kind=items&order=${id}`}>تصدير أصناف الطلب Excel</Link></div>}
+ <div className="admin-detail-grid admin-section">{canWrite&&<OrderTransition id={id} status={o.status} revision={o.revision} staff remaining={Math.max(o.total-paid,0)} method={o.payment_method} request={crypto.randomUUID()}/>} {canWrite&&(o.status!=="CANCELLED"||paid>0)&&<details className="manual-payment"><summary>تحصيل جزئي أو رد مبلغ — اختياري</summary><PaymentForm key={payments.data.length} id={id} request={crypto.randomUUID()} refundOnly={o.status==="CANCELLED"||paid>o.total}/></details>}</div>
+ <section className="admin-section no-print"><h2>المرتجعات</h2>{returns.data.map(r=><article className="form-panel" key={r.id}><h3>{r.status==="REQUESTED"?"مرتجع تحت المراجعة":r.status==="APPROVED"?"مرتجع معتمد":"مرتجع مرفوض"}</h3><p>{r.reason}</p><p>قيمة المرتجع: {formatEgp(r.amount)}</p><ul>{(r.lines as {name:string;unit:string;quantity:number}[]).map((l,index)=><li key={index}>{l.name} — {l.quantity} {l.unit}</li>)}</ul>{r.review_note&&<p>{r.review_note}</p>}{canWrite&&r.status==="REQUESTED"&&<ReviewReturnForm id={r.id}/>}</article>)}{o.status==="DELIVERED"&&!pendingReturn&&lines.data.some(l=>l.quantity>0)&&(!admin||canWrite)&&<ReturnForm key={o.revision} order={id} requestId={crypto.randomUUID()} lines={lines.data} admin={admin}/>}</section>
+ {!admin&&lines.data.some(l=>l.quantity>0)&&<div className="admin-section"><Reorder items={lines.data.filter(l=>l.quantity>0).map(l=>({unit_id:l.unit_id,quantity:l.quantity,name:l.product_name,unit_name:l.unit_name}))}/></div>}
+ </>;
+}

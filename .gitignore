@@ -1,0 +1,17 @@
+node_modules/
+.work/
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+.env*
+!.env.example
+*.tsbuildinfo
+.vercel/
+supabase/.temp/
+
+# Local hosting metadata and generated deliverables
+.netlify/
+output/
+tmp/

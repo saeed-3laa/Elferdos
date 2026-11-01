@@ -1,0 +1,41 @@
+{
+  "note": "UI prototype checks only; no production pricing, database or order tests.",
+  "results": [
+    {
+      "width": 1440,
+      "passed": [
+        "demo tier change",
+        "cart calculation",
+        "dialog Escape",
+        "favorites",
+        "search",
+        "list/grid",
+        "no horizontal overflow",
+        "no page errors"
+      ],
+      "bodyWidth": 1440,
+      "viewport": 1440,
+      "searchTop": 33.640625,
+      "firstCardTop": 578.046875,
+      "cardHeight": 467.84375
+    },
+    {
+      "width": 390,
+      "passed": [
+        "demo tier change",
+        "cart calculation",
+        "dialog Escape",
+        "favorites",
+        "search",
+        "list/grid",
+        "no horizontal overflow",
+        "no page errors"
+      ],
+      "bodyWidth": 390,
+      "viewport": 390,
+      "searchTop": 108.390625,
+      "firstCardTop": 486.859375,
+      "cardHeight": 409.265625
+    }
+  ]
+}

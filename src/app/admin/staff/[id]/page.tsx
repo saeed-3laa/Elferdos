@@ -1,0 +1,7 @@
+import Link from "next/link";
+import {StaffConfirmationForm} from "@/components/staff-account-forms";
+import {notFound} from "next/navigation";
+import {z} from "zod";
+import {requireStaff} from "@/server/auth/staff";
+import {StaffForm,RecoveryForm,ManagedProfileForm} from "@/components/customer-admin-forms";
+export default async function Page({params}:{params:Promise<{id:string}>}){const {client,user}=await requireStaff("staff.manage");const {id}=await params;if(!z.uuid().safeParse(id).success)notFound();const p=await client.from("profiles").select("id,full_name,phone,active,account_kind,login_email").eq("id",id).eq("account_kind","STAFF").maybeSingle();if(p.error)throw new Error("STAFF_UNAVAILABLE");if(!p.data)notFound();const a=await client.from("staff_assignments").select("role,active").eq("user_id",id).single();if(a.error)throw new Error("STAFF_UNAVAILABLE");return <><Link className="text-link" href="/admin/staff">فريق الإدارة</Link><h1>{p.data.full_name}</h1><section className="form-panel"><p><bdi>{p.data.login_email}</bdi></p><p><bdi>{p.data.phone}</bdi></p><p>حساب إدارة — لا يحتاج محلًا أو عنوان توصيل.</p></section>{id===user.id?<Link className="button" href="/admin/profile">بيانات دخولي</Link>:<div className="reference-grid"><ManagedProfileForm profile={p.data}/><StaffForm target={id} role={a.data.role} active={a.data.active}/><RecoveryForm target={id}/><StaffConfirmationForm target={id}/></div>}<p className="field-hint">إزالة تفعيل الموظف تمنع دخوله وتبطل جلساته؛ سجلاته السابقة محفوظة للمراجعة.</p></>;}

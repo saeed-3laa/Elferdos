@@ -1,0 +1,5 @@
+"use client";
+import {useState,useTransition} from "react";
+import {previewPricing} from "@/app/admin/pricing/actions";
+import {formatEgp} from "@/domain/money";
+export function PricePreview({units}:{units:{id:string;name:string}[]}){const [result,setResult]=useState<{price?:number;label?:string;error?:string}>({});const [pending,start]=useTransition();return <form className="account-form form-panel" action={form=>start(async()=>setResult(await previewPricing(form)))}><h2>معاينة السعر المؤهل الآن</h2><label>وحدة المنتج<select name="unit" required>{units.map(u=><option key={u.id} value={u.id}>{u.name}</option>)}</select></label><label>عدد وحدات الجملة<input name="quantity" type="number" min={1} max={100000} defaultValue={1} required/></label><label>موبايل العميل (اختياري)<input name="phone" type="tel"/></label><button className="button" disabled={pending||!units.length}>معاينة السعر</button>{result.error&&<p role="alert" className="form-error">{result.error}</p>}{result.price!==undefined&&<p role="status">{formatEgp(result.price)} للوحدة · {result.label}</p>}</form>;}
