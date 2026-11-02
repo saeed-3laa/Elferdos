@@ -1,0 +1,38 @@
+name: Hosted staging smoke
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/staging-smoke.yml
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check public staging without credentials or fixture writes
+        shell: bash
+        run: |
+          set -euo pipefail
+          origin=https://elferdos-staging.netlify.app
+          check() {
+            path="$1"
+            expected="$2"
+            status=$(curl --silent --show-error --max-time 45 --retry 2 --retry-all-errors \
+              -D headers.txt -o body.txt -w '%{http_code}' "$origin$path")
+            echo "$path HTTP $status (expected $expected)"
+            test "$status" = "$expected"
+          }
+          check / 200
+          grep -iq '^content-security-policy:.*nonce-' headers.txt
+          grep -iq '^cache-control:.*no-store' headers.txt
+          check /staff/login 200
+          grep -iq '^cache-control:.*no-store' headers.txt
+          check /branding/ferdous-logo.png 200
+          grep -iq '^content-type: image/png' headers.txt
+          check '/api/search?scope=customers&q=a' 403
+          grep -iq '^cache-control:.*no-store' headers.txt
+          python3 -c 'import json; assert json.load(open("body.txt")) == {"items": []}'
+          echo 'Hosted smoke passed: homepage, staff login, logo and unauthenticated private search.'
