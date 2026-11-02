@@ -6,5 +6,9 @@
 [build.environment]
   NODE_VERSION = "24"
 
+# Explicitly enable the Next.js runtime for sites provisioned through the API.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
 # Netlify detects Next.js and installs its supported OpenNext adapter.
 # This is a server-rendered app: do not use static export or an SPA fallback.
