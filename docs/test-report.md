@@ -1,5 +1,12 @@
 # تقرير التحقق المحلي
 
+## Local reachability fix — 2 November 2026
+
+The user could not open the default netlify.app hostname despite a passing remote smoke. Local TCP443to its two resolved addresses timed out. A normal certificate-verified request pinned only for diagnosis to the documented Netlify load-balancer returned200; no hosts/DNS/proxy settings were changed. After the user created a free DuckDNS account and completed reCAPTCHA, elferdos-staging.duckdns.org was pointed to75.2.60.5and attached as the primary custom domain of the same staging site. Netlify issued its certificate. Ordinary local DNS/HTTPS now returns200for homepage/staff-login/logo and403for private customer search, with CSP and no-store headers. The smoke workflow now targets https://elferdos-staging.duckdns.org. APP_ORIGIN and Auth redirects are being synchronized and redeployed; full authenticated hosted journeys are not yet verified.
+
+Phone Auth was enabled with approval, but no-SMS phone confirmation setup remains incomplete; no customer signup or SMS was attempted. Global mandatory MFA remains unchanged pending the real owner enrollment.
+
+
 ## Hosted staging checkpoint — 2 November 2026
 
 Latest full GitHub Actions run41368253377 passed314unit/SQL tests in12files,8basic browser tests and70connected journeys, plus lint, typecheck, build and the high-severity audit threshold. Prior run41367295386 failed1of70connected journeys due to duplicate retained DOM around the Excel file input; the corrected visible-input locator passed in the next full run. These tests used isolated local Supabase in CI, not hosted staging.
