@@ -1,5 +1,16 @@
 # تقرير التحقق المحلي
 
+## Hosted staging checkpoint — 2 November 2026
+
+Latest full GitHub Actions run41368253377 passed314unit/SQL tests in12files,8basic browser tests and70connected journeys, plus lint, typecheck, build and the high-severity audit threshold. Prior run41367295386 failed1of70connected journeys due to duplicate retained DOM around the Excel file input; the corrected visible-input locator passed in the next full run. These tests used isolated local Supabase in CI, not hosted staging.
+
+Hosted smoke run41367295379 has3failed attempts so far: first homepage401from Netlify SSO, then404from a missing Next.js runtime, then a private-search assertion200instead of403after the homepage/login/logo and CSP/no-store checks passed. The runtime is now provisioned. The last failure exposed missing host environment variables;3public values were saved and verified, and2server secrets were subsequently saved with explicitly approved Free-plan Builds/Functions/Runtime scopes. A fresh deployment and complete smoke rerun are pending. Do not count the partial HTTP checks as a passed suite.
+
+Supabase staging schema setup and a fresh OWNER were authorized and completed without copying local accounts. Real owner email confirmation was verified; direct Auth login and OWNER access passed and the test session was signed out. Browser login and real-owner TOTP remain pending. Custom email templates were rejected by the Free default provider; URL-only configuration was accepted without changing email confirmation/TOTP protections. Customer phone Auth/SMS and additional staff email flows remain open. See [hosting evidence and remaining blockers](staging-deployment.md).
+
+Older sections below record historical local states. Pre028stock-reservation results do not describe the current manual availability model.
+
+
 ## تنظيف التوافر 030 — ١ نوفمبر ٢٠٢٦
 
 طُبق 030 محليًا فقط دون reset أو تغيير الترحيلات السابقة أو المنطق المالي. نجحت 314 حالة في 12 ملفًا، وlint وtypecheck، وبناء واجهة التوافر. نجحت قراءة التوافر للمشاهد مع رفض تغييره، ورفض الصلاحيات المتقاعدة، وافتراضات الاستيراد وحفظ السجلات التاريخية. فحص PostgreSQL المحلي للقراءة فقط أثبت صفر صلاحيات مخزون متقاعدة وثبات منع الوصول للجداول وRPC القديم.
