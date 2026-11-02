@@ -1,5 +1,12 @@
 # تقرير التحقق المحلي
 
+## Hosted phone Auth verified — 2 November 2026
+
+Staging public Auth settings now verify phone enabled with phone_autoconfirm=true, while email auto-confirm staysfalse. A reviewed phone-only config push changed exactly2properties; the post-change diff has0declared updates and retains email confirmation/TOTP protections. No Twilio credentials or SMS subscription were configured.
+
+Executed inline Node staging smoke: public phone/password signup returned a session and confirmed phone; own profile was CUSTOMER; staff access wasnull; the owner profile was hidden; logout and a fresh password login succeeded. The synthetic Auth account was subsequently banned, sessions revoked and its profile deactivated using an ID/name/kind guard. No business or financial records were changed. This was an Auth/API test, not the deployed registration-form browser journey. No lint/typecheck/unit rerun was needed for this configuration-only change; earlier CI results remain separately recorded.
+
+
 ## Local reachability fix — 2 November 2026
 
 The user could not open the default netlify.app hostname despite a passing remote smoke. Local TCP443to its two resolved addresses timed out. A normal certificate-verified request pinned only for diagnosis to the documented Netlify load-balancer returned200; no hosts/DNS/proxy settings were changed. After the user created a free DuckDNS account and completed reCAPTCHA, elferdos-staging.duckdns.org was pointed to75.2.60.5and attached as the primary custom domain of the same staging site. Netlify issued its certificate. Ordinary local DNS/HTTPS now returns200for homepage/staff-login/logo and403for private customer search, with CSP and no-store headers. The smoke workflow now targets https://elferdos-staging.duckdns.org. APP_ORIGIN and Auth redirect updates were applied; deploy6ae7e88dcb4a6668d6e6ac44at commit467783c3050e5ca0ef62e66a8241603ec850ff1creached ready and hosted smoke run41373149490passed. The homepage was also opened in the local in-app browser. Full authenticated hosted journeys are not yet verified.

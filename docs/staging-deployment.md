@@ -76,3 +76,14 @@ Current replacement test URL: https://elferdos-staging.duckdns.org. It remains t
 Phone testing: the user explicitly approved phone/password without SMS for staging only. external_phone_enabled=true was verified, but effective phone_autoconfirm remainedfalse. CLI2.122 compared its SMS confirmation field directly to sms_autoconfirm rather than inversely; a workaround diff was not executed because automatic approval review timed out twice. No test signup or SMS send was attempted in this incomplete state. This remains open; email confirmation and TOTP protections were unchanged.
 
 The user was asked to finish the approved no-SMS phone setting directly in the staging Supabase Phone provider UI because the CLI workaround review timed out twice. Verify effective phone_autoconfirm before any customer-signup test; no real SMS test is authorized.
+
+
+### Phone/password testing resolved — 2 November 2026
+
+The dashboard required empty Twilio credentials even with phone confirmations switched off, so the user could not save. No fake provider credentials or paid SMS account were added. After reviewing a phone-only diff in an ignored isolated workdir, CLI2.122 config push applied only external_phone_enabled and sms_autoconfirm using its verified direct mapping. The CLI hosted mapping of auth.sms.enable_confirmations is direct rather than inverted in this version; this isolated file is not the local-start config and must not be copied into deployment/production settings. The canonical local config and migration history were unchanged.
+
+Read-back from /auth/v1/settings verified external.phone=true, phone_autoconfirm=true, external.email=true and mailer_autoconfirm=false. A subsequent config diff showed0declared changes; email confirmations and TOTP enrollment/verification remained enabled. This no-ownership-check phone policy is explicitly authorized only for staging and must be reconsidered before public launch.
+
+An inline Node smoke, using the staging publishable client rather than admin creation, registered one synthetic phone/password customer and received a confirmed phone plus signed-in session without requesting an SMS code. Checks passed: own profile is CUSTOMER; get_staff_access is null; selecting the owner profile returns0rows; global logout succeeds; a fresh phone/password login succeeds. Test credentials are only in an ignored private fixture file. After testing, its sessions were revoked, its Auth account banned and its guarded synthetic profile set inactive. No order, payment, refund or stock operations were performed. The inactive fixture is retained rather than deleting records.
+
+This verifies the hosted Auth/database flow, not form submission through the deployed registration page or a complete hosted ordering journey. Those and real-owner TOTP remain unverified. Older phone-pending notes above describe the earlier checkpoint and are superseded by this verified result.
