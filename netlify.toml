@@ -10,5 +10,21 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+# Keep this last so its onPostBuild recheck follows framework packaging.
+# Set FERDOUS_DEPLOYMENT_TIER=staging on the existing staging site only.
+# Production requires a separate site/origin/backend and its readiness check.
+[[plugins]]
+  package = "./netlify/plugins/deployment-gates"
+
+# Defense in depth, not a substitute for Dashboard context/secret isolation:
+# untrusted PRs can alter repository config before any Build Plugin runs.
+[context.deploy-preview.environment]
+  SUPABASE_SERVICE_ROLE_KEY = ""
+  AUTH_RATE_LIMIT_SECRET = ""
+  FERDOUS_GITHUB_READ_TOKEN = ""
+  NEXT_PUBLIC_SUPABASE_URL = ""
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = ""
+  APP_ORIGIN = ""
+
 # Netlify detects Next.js and installs its supported OpenNext adapter.
 # This is a server-rendered app: do not use static export or an SPA fallback.

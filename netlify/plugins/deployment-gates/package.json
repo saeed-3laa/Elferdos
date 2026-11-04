@@ -1,0 +1,6 @@
+{
+  "name": "netlify-plugin-ferdous-deployment-gates",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module"
+}
