@@ -3,6 +3,9 @@ import { openFrontendFixture } from "../helpers/frontend-fixture";
 import { measureFrontendContrast } from "../helpers/frontend-contrast";
 import { adminItems, existingCart, reorderItems } from "../fixtures/frontend-data";
 
+// Allow the first cold Next.js/fixture compilation on CI and local Windows.
+test.setTimeout(60000);
+
 const cartKey = "ferdous-cart-v1";
 const phase = process.env.FRONTEND_AUDIT_PHASE ?? "after";
 async function storedCart(page: Page) { return page.evaluate(key => localStorage.getItem(key), cartKey); }
