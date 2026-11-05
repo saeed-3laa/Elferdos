@@ -6,6 +6,23 @@ import {parseEgpInput} from "@/domain/admin";
 import {egyptianPhoneSchema} from "@/domain/phone";
 import type {FormState} from "@/domain/accounts";
 import {offerFormSchema,nextOfferDay} from "@/domain/offers";
+
+export async function archivePricingRule(_state: FormState, form: FormData): Promise<FormState> {
+  const { client } = await requireStaff("catalog.write");
+  const parsed = z.object({
+    id: z.uuid(), revision: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().nonnegative()),
+    archived: z.enum(["true", "false"]),
+  }).safeParse(Object.fromEntries(form));
+  if (!parsed.success) return { error: "راجع العرض وحاول مرة تانية." };
+
+  const { id, revision, archived } = parsed.data;
+  const { error } = await client.rpc("archive_pricing_rule", { p_id: id, p_revision: revision, p_archived: archived === "true" });
+  if (error) return { error: error.code === "40001" ? "العرض اتغير. حدّث الصفحة وحاول تاني." : "تعذّر تحديث حالة العرض." };
+  revalidatePath("/admin/pricing");
+  revalidatePath("/");
+  return { success: archived === "true" ? "تمت أرشفة العرض" : "تم استرجاع العرض وهو موقوف" };
+}
+
 export async function savePricingRule(_state:FormState,form:FormData):Promise<FormState>{
  const {client}=await requireStaff("catalog.write");const parsed=offerFormSchema.safeParse(Object.fromEntries(form));
  if(!parsed.success)return {error:"راجع بيانات العرض واختيار المنتج أو القسم وتواريخه. العروض غير مشروطة بكمية."};const d=parsed.data;let customer:string|null=null;
