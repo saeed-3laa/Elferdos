@@ -20,7 +20,8 @@ export function ProductCard({ item }: { item: CatalogItem }) {
     <p className="unit-description">{item.unit_name} · {number.format(item.pieces_per_unit)} قطعة داخلية<span>أقل كمية: {number.format(item.minimum_quantity)} {item.unit_name}</span></p>
     <div className="product-price"><strong className="price">{formatEgp(item.price_piastres)}</strong><span>للـ{item.unit_name}</span></div>
     {item.price_piastres<item.base_price_piastres&&<p className="previous-price"><del>{formatEgp(item.base_price_piastres)}</del> · {item.price_label}</p>}
-    <small>سعر عام عند أقل كمية / {item.unit_name}. السعر الخاص والشرائح يُراجعان في السلة.</small>
+    {item.price_piastres<item.base_price_piastres&&<p className="offer-saving">وفّر {formatEgp(item.base_price_piastres-item.price_piastres)} في كل {item.unit_name}</p>}
+    <small>السعر للـ{item.unit_name}. السعر الخاص يُراجع في السلة؛ الخصومات لا تُجمع.</small>
     {item.description&&<details><summary>وصف المنتج</summary><p>{item.description}</p></details>}
     </div>
     <AddToCart id={item.unit_id} name={item.name} unit={item.unit_name} minimum={item.minimum_quantity} available={item.available}/>
