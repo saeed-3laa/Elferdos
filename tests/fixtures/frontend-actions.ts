@@ -5,5 +5,4 @@ export {
   unavailable as loginAction, unavailable as registerAction,
   unavailable as updateProfileAction, unavailable as saveAddressAction, unavailable as deleteAddressAction,
   unavailable as archiveProduct, unavailable as saveProduct, unavailable as saveReference, unavailable as saveUnit,
-  unavailable as savePricingRule,
 };
