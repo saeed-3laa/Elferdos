@@ -863,7 +863,7 @@ describe("timed offers without quantity tiers", () => {
  const unit="30000000-0000-4000-8000-000000000001", category="10000000-0000-4000-8000-000000000001";
  beforeEach(async()=>{
   await db.exec("reset role");
-  for(const file of ["202610310028_manual_product_availability.sql","202610310029_partial_phone_search.sql","202610310030_manual_availability_cleanup.sql","20261104223757_timed_offers_without_quantity_tiers.sql"])
+  for(const file of ["202610310028_manual_product_availability.sql","202610310029_partial_phone_search.sql","202610310030_manual_availability_cleanup.sql","20261104223757_timed_offers_without_quantity_tiers.sql","20261105195502_archive_pricing_rules.sql"])
    await db.exec((await readFile("supabase/migrations/"+file,"utf8")).replace(/^begin;/,"").replace(/commit;\s*$/,""));
   await db.exec("update public.products set available=true");
  });
@@ -893,6 +893,24 @@ describe("timed offers without quantity tiers", () => {
   const id=(await save()).rows[0]!.id;await save(1,id,0);await expect(save(1,id,0)).rejects.toThrow("EDIT_CONFLICT");
  });
  it("still denies customer writes at the RPC boundary",async()=>{await asUser(ids.alice);await expect(save()).rejects.toThrow("FORBIDDEN");});
+ it("archives the offer without deleting it and restores it without applying the discount", async () => {
+  await asUser(ids.owner);
+  const id = (await save()).rows[0]!.id;
+  expect((await db.query("select price_piastres::int from public.browse_catalog('DEMO-DRINK')")).rows).toEqual([{price_piastres:21600}]);
+  await db.query("select public.archive_pricing_rule($1, 0, true)", [id]);
+  expect((await db.query("select active, archived_at is not null archived from public.pricing_rules where id=$1", [id])).rows).toEqual([{active:false, archived:true}]);
+  expect((await db.query("select price_piastres::int from public.browse_catalog('DEMO-DRINK')")).rows).toEqual([{price_piastres:24000}]);
+  await db.exec("savepoint archived_edit");
+  await expect(save(1, id, 1)).rejects.toThrow("archived_pricing_rule_is_inactive");
+  await db.exec("rollback to savepoint archived_edit");
+  await db.query("select public.archive_pricing_rule($1, 1, false)", [id]);
+  expect((await db.query("select active, archived_at from public.pricing_rules where id=$1", [id])).rows).toEqual([{active:false, archived_at:null}]);
+  await expect(db.query("select public.archive_pricing_rule($1, 1, true)", [id])).rejects.toThrow("EDIT_CONFLICT");
+ });
+ it("denies customer access to the offer archive RPC", async () => {
+  await asUser(ids.alice);
+  await expect(db.query("select public.archive_pricing_rule($1, 0, true)", [product])).rejects.toThrow("FORBIDDEN");
+ });
  it("uses one best price for every quantity and ignores retained legacy tiers",async()=>{
   await db.query("insert into public.pricing_rules(name,product_id,minimum_quantity,kind,value,starts_at,ends_at) values('شريحة قديمة',$1,5,'fixed',1,now()-interval '1 day',now()+interval '1 day')",[product]);
   await asUser(ids.owner);await save();await db.exec("reset role");
