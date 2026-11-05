@@ -718,13 +718,6 @@ input:focus,.account-form input:focus,.account-form textarea:focus,.account-form
  body { background:white!important; }
 }
 
-/* Approved Al-Ferdous identity; keep the original transparent artwork intact. */
-.brand.brand-identity { display:flex; flex-direction:column; align-items:flex-start; gap:2px; line-height:1.2; flex-shrink:0; }
-.brand-identity .brand-logo,.invoice-logo { display:block; width:180px; height:auto; }
-.brand-identity .brand-slogan,.invoice-heading .brand-slogan { font-size:11px; font-weight:500; color:var(--muted); margin:0; }
-.invoice-heading .brand-slogan { margin:2px 0 8px; }
-@media(max-width:600px) { .brand-identity .brand-logo { width:144px; } .brand-identity .brand-slogan { font-size:10px; } }
-
 /* Approved audit fixes F01–F04: accessible controls, without changing layout. */
 .admin-nav a:focus-visible { outline-offset:-3px; }
 input::placeholder,textarea::placeholder { color:var(--muted); opacity:1; }
@@ -735,3 +728,10 @@ input::placeholder,textarea::placeholder { color:var(--muted); opacity:1; }
 .reorder-confirmation .form-links { gap:12px; }
 .reorder-confirmation .button { white-space:normal; }
 @media(max-width:650px) { .reorder-confirmation { padding:21px; } .reorder-confirmation .button { width:100%; } }
+
+/* Approved Al-Ferdous identity; keep the original transparent artwork intact. */
+.brand.brand-identity { display:flex; flex-direction:column; align-items:flex-start; gap:2px; line-height:1.2; flex-shrink:0; }
+.brand-identity .brand-logo,.invoice-logo { display:block; width:180px; height:auto; }
+.brand-identity .brand-slogan,.invoice-heading .brand-slogan { font-size:11px; font-weight:500; color:var(--muted); margin:0; }
+.invoice-heading .brand-slogan { margin:2px 0 8px; }
+@media(max-width:600px) { .brand-identity .brand-logo { width:144px; } .brand-identity .brand-slogan { font-size:10px; } }

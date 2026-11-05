@@ -1,10 +1,13 @@
 import { test, expect, type Page } from "@playwright/test";
-import { openFrontendFixture } from "../helpers/frontend-fixture";
+import { openFrontendFixture, prepareFrontendFixture } from "../helpers/frontend-fixture";
 import { measureFrontendContrast } from "../helpers/frontend-contrast";
 import { adminItems, existingCart, reorderItems } from "../fixtures/frontend-data";
 
-// Allow the first cold Next.js/fixture compilation on CI and local Windows.
-test.setTimeout(60000);
+test.beforeAll(async ({ request }, testInfo) => {
+  // Match the web server's startup budget for setup only.
+  testInfo.setTimeout(120_000);
+  await prepareFrontendFixture(request);
+});
 
 const cartKey = "ferdous-cart-v1";
 const phase = process.env.FRONTEND_AUDIT_PHASE ?? "after";
