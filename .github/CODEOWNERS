@@ -1,0 +1,9 @@
+# Enforce these owners with protected-main required reviews; this file alone is not protection.
+/.github/ @saeed-3laa
+/netlify.toml @saeed-3laa
+/netlify/ @saeed-3laa
+/scripts/deployment-gates.mjs @saeed-3laa
+/scripts/check-production-security.mjs @saeed-3laa
+/tests/deployment/ @saeed-3laa
+/package.json @saeed-3laa
+/package-lock.json @saeed-3laa
