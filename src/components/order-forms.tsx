@@ -1,5 +1,5 @@
 "use client";
-import {useActionState} from "react";
+import {useActionState,useEffect,useId,useRef,useState} from "react";
 import {useRouter} from "next/navigation";
 import {transitionOrder,recordPayment} from "@/app/admin/order-actions";
 import {statusLabels,nextStatus,type CartItem} from "@/domain/orders";
@@ -18,4 +18,23 @@ export function PaymentForm({id,request,refundOnly=false}:{id:string;request:str
  <input type="hidden" name="order" value={id}/><input type="hidden" name="request" value={request}/><label>نوع الحركة<select name="direction" defaultValue={refundOnly?"refund":"receive"}>{!refundOnly&&<option value="receive">تحصيل فعلي</option>}<option value="refund">رد مبلغ للعميل</option></select></label><label>المبلغ بالجنيه<input name="amount" inputMode="decimal" required/></label>
  <label>طريقة الدفع<select name="method"><option value="cash">كاش</option><option value="instapay">إنستا باي</option></select></label><label>مرجع أو سبب الحركة<input name="reference" maxLength={200} required/></label><p className="field-hint">سجّل فقط المبالغ المحصلة أو المردودة فعليًا.</p><button className="button" disabled={pending}>{pending?"جارٍ التسجيل…":"تأكيد حركة الدفع"}</button></form>;
 }
-export function Reorder({items}:{items:CartItem[]}){const {setItems,ready}=useCart();const router=useRouter();return <button className="button button-secondary" disabled={!ready} onClick={()=>{setItems(items);router.push("/cart");}}>إعادة الطلب بأسعار اليوم</button>;}
+export function Reorder({items}:{items:CartItem[]}){
+ const {items:currentCart,setItems,ready}=useCart();const router=useRouter();
+ const [confirming,setConfirming]=useState(false);const dialog=useRef<HTMLDialogElement>(null);
+ const titleId=useId(),descriptionId=useId();
+ useEffect(()=>{
+  const element=dialog.current;if(!confirming||!element)return;
+  const previous=document.activeElement instanceof HTMLElement?document.activeElement:null;
+  const overflow=document.body.style.overflow;
+  element.showModal();document.body.style.overflow="hidden";
+  return ()=>{if(element.open)element.close();document.body.style.overflow=overflow;if(previous?.isConnected)previous.focus();};
+ },[confirming]);
+ function replaceCart(){setConfirming(false);setItems(items);router.push("/cart");}
+ return <><button type="button" className="button button-secondary" disabled={!ready} aria-haspopup={currentCart.length?"dialog":undefined} onClick={()=>{if(currentCart.length)setConfirming(true);else replaceCart();}}>إعادة الطلب بأسعار اليوم</button>
+  <dialog ref={dialog} className="reorder-confirmation" role="alertdialog" aria-labelledby={titleId} aria-describedby={descriptionId} onCancel={()=>setConfirming(false)} onClose={()=>setConfirming(false)}>
+   <h2 id={titleId}>استبدال السلة الحالية؟</h2>
+   <p id={descriptionId}>سلتك تحتوي على أصناف بالفعل. إعادة الطلب ستستبدل جميع محتويات السلة الحالية بأصناف هذا الطلب. الأسعار والتوافر يُراجعان في السلة قبل إرسال الطلب.</p>
+   <div className="form-links"><button type="button" className="button button-secondary" autoFocus onClick={()=>setConfirming(false)}>الاحتفاظ بالسلة الحالية</button><button type="button" className="button" onClick={replaceCart}>استبدال السلة وإعادة الطلب</button></div>
+  </dialog>
+ </>;
+}
