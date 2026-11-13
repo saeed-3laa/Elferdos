@@ -58,9 +58,9 @@ export function PricingTargetPicker({ initialScope = "all", initialLabel = "", u
           } else if (event.key === "Enter" && open) { event.preventDefault(); if (items[active]) choose(items[active]); }
         }} /></label>
       {open && !!text.trim() && <div className="search-suggestions"><ul role="listbox" id={listId} aria-label={`نتائج بحث ${noun}`}>
-        {items.map((item, index) => <li role="option" id={`${listId}-${index}`} aria-selected={active === index} key={item.id} onPointerDown={event => event.preventDefault()} onClick={() => choose(item)}><span>{item.label}</span><small>{item.detail}</small></li>)}
+        {items.map((item, index) => <li role="option" id={`${listId}-${index}`} aria-selected={active === index} key={item.id} onPointerDown={event => event.preventDefault()} onClick={() => choose(item)}><span><bdi>{item.label}</bdi></span><small><bdi>{item.detail}</bdi></small></li>)}
       </ul><p role="status">{status}</p></div>}
-      {selected && <p className="field-hint">تم اختيار: {text}</p>}
+      {selected && <p className="field-hint">تم اختيار: <bdi>{text || selected}</bdi></p>}
       {!selected && text && !open && <p className="field-hint">اختار نتيجة البحث لتأكيد {noun}.</p>}
     </div>}
   </div>;

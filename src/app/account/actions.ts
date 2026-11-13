@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { addressSchema, profileSchema, type FormState } from "@/domain/accounts";
+import { addressSchema, profileSchema, validationState, type FormState } from "@/domain/accounts";
 import { requireCustomer } from "@/server/auth/customer";
 
 export async function updateProfileAction(_state: FormState, form: FormData): Promise<FormState> {
@@ -10,7 +10,7 @@ export async function updateProfileAction(_state: FormState, form: FormData): Pr
   const parsed = profileSchema.safeParse(Object.fromEntries(
     ["full_name", "shop_name", "delivery_address", "area", "delivery_notes"].map((key) => [key, form.get(key) ?? ""]),
   ));
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "راجع البيانات" };
+  if (!parsed.success) return validationState(parsed.error.issues, "راجع البيانات");
   try {
     const { data, error } = await client.from("profiles").update(parsed.data).eq("id", user.id).select("id").single();
     if (error || !data) return { error: "تعذّر حفظ البيانات. حاول مرة أخرى." };
@@ -27,7 +27,7 @@ export async function saveAddressAction(_state: FormState, form: FormData): Prom
     id: form.get("id") ?? "", zone_id: form.get("zone_id"), address: form.get("address"),
     notes: form.get("notes") ?? "", is_default: form.get("is_default") === "on",
   });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "راجع بيانات العنوان" };
+  if (!parsed.success) return validationState(parsed.error.issues, "راجع بيانات العنوان");
   try {
     const { data, error } = await client.rpc("save_customer_address", {
       p_id: parsed.data.id || null, p_zone: parsed.data.zone_id, p_address: parsed.data.address,

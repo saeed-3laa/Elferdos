@@ -58,7 +58,7 @@ test("shows genuine offers and supports hover, wholesale quantities, a persisten
   await page.screenshot({path:info.outputPath("catalog-list.png"),fullPage:true});
   await page.getByRole("button",{name:"السلة",exact:true}).click();await expect(drawer.getByRole("spinbutton")).toHaveValue("4");
   await drawer.getByRole("link",{name:"مراجعة السلة",exact:true}).click();await expect(page).toHaveURL(/\/cart$/);
-  await expect(drawer).not.toBeVisible();await expect(page.getByRole("spinbutton",{name:"كمية منتج اختبار عرض حقيقي",exact:true})).toHaveValue("4");
+  await expect(drawer).not.toBeVisible();await expect(page.getByRole("main").getByRole("spinbutton",{name:"كمية منتج اختبار عرض حقيقي كرتونة",exact:true})).toHaveValue("4");
   await page.goto(`/?category=${category}`);await page.getByRole("button",{name:"السلة",exact:true}).click();
   await drawer.getByRole("button",{name:"حذف منتج اختبار عرض حقيقي من السلة",exact:true}).click();
   await expect(drawer.getByRole("heading",{name:"السلة لسه فاضية",exact:true})).toBeVisible();

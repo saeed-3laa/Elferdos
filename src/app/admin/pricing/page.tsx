@@ -30,13 +30,18 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ a
   const [products, categories, units, profiles] = await Promise.all([
     ids("product_id").length ? client.from("products").select("id,name,sku").in("id", ids("product_id")) : { data: [], error: null },
     ids("category_id").length ? client.from("categories").select("id,name").in("id", ids("category_id")) : { data: [], error: null },
-    ids("unit_id").length ? client.from("product_units").select("id,name").in("id", ids("unit_id")) : { data: [], error: null },
+    ids("unit_id").length ? client.from("product_units").select("id,name,products(name,sku)").in("id", ids("unit_id")) : { data: [], error: null },
     ids("customer_id").length ? client.from("profiles").select("id,phone").in("id", ids("customer_id")) : { data: [], error: null },
   ]);
   if (products.error || categories.error || units.error || profiles.error) throw new Error("PRICING_TARGETS_UNAVAILABLE");
   function targetLabel(rule: PricingRule) {
     const product = products.data?.find(item => item.id === rule.product_id);
-    return product ? product.name + " (" + product.sku + ")" : categories.data?.find(item => item.id === rule.category_id)?.name ?? units.data?.find(item => item.id === rule.unit_id)?.name ?? "";
+    const unit=units.data?.find(item => item.id === rule.unit_id);
+    if(unit){
+      const product=Array.isArray(unit.products)?unit.products[0]:unit.products as {name:string;sku:string}|null;
+      return [product?.name, unit.name, product?.sku].filter(Boolean).join(" · ");
+    }
+    return product ? product.name + " (" + product.sku + ")" : categories.data?.find(item => item.id === rule.category_id)?.name ?? "";
   }
   return <><div className="section-heading"><div><h1>الأسعار والعروض</h1><p>منتج أو قسم كامل، بسعر أفضل خلال المدة اللي تحددها.</p></div><Icon name="tag" /></div>
     <p className="pricing-intro">بدون شرائح كميات. العروض العامة السارية تظهر أول المتجر، وأفضل سعر مؤهل يفوز دون جمع الخصومات.</p>
