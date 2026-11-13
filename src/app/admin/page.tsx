@@ -14,7 +14,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     {permission:"orders.read",href:"/admin/orders",title:"الطلبات والتحصيل",copy:"من أول طلب جديد لحد التسليم والتحصيل.",action:"متابعة الطلبات",icon:"cart"},
     {permission:"catalog.read",href:"/admin/products",title:"المنتجات ووحدات الجملة",copy:"المنتجات والأسعار والصور والتوافر، في مكان واحد.",action:"فتح المنتجات",icon:"box"},
     {permission:"customers.read",href:"/admin/customers",title:"العملاء",copy:"بيانات محلاتك وحساباتهم وصلاحيات فريقك.",action:"إدارة العملاء",icon:"users"},
-    {permission:"catalog.write",href:"/admin/pricing",title:"العروض والأسعار",copy:"عروض عامة وشرائح كميات وأسعار خاصة لعملائك.",action:"إدارة العروض",icon:"tag"},
+    {permission:"catalog.write",href:"/admin/pricing",title:"العروض والأسعار",copy:"عروض بمدة محددة وأسعار خاصة لعملائك.",action:"إدارة العروض",icon:"tag"},
     {permission:"settings.write",href:"/admin/zones",title:"التوصيل داخل الإسكندرية",copy:"المناطق المتاحة ومواعيد التوصيل. التوصيل مجاني.",action:"إدارة المناطق",icon:"truck"},
     {permission:"reports.read",href:"/admin/reports",title:"التقارير",copy:"راجع المبيعات والطلبات والمبالغ المحصلة فعليًا.",action:"عرض التقارير",icon:"report"},
   ];

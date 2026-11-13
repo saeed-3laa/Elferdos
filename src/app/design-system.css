@@ -735,3 +735,16 @@ input::placeholder,textarea::placeholder { color:var(--muted); opacity:1; }
 .brand-identity .brand-slogan,.invoice-heading .brand-slogan { font-size:11px; font-weight:500; color:var(--muted); margin:0; }
 .invoice-heading .brand-slogan { margin:2px 0 8px; }
 @media(max-width:600px) { .brand-identity .brand-logo { width:144px; } .brand-identity .brand-slogan { font-size:10px; } }
+
+/* Timed offers: a quiet blue shelf, with genuine per-unit savings. */
+.pricing-intro { color:var(--muted); margin-block:0 24px; max-width:70ch; }
+.pricing-target-picker { display:grid; gap:16px; min-width:0; }
+.pricing-target-picker .search-suggestions { z-index:30; }
+.offers-shelf { background:#f3f6fc; border-radius:20px; padding:24px; margin-block:0 30px; scroll-margin-top:30px; }
+.offers-shelf-heading { display:flex; align-items:center; gap:12px; margin-block-end:22px; }
+.offers-shelf-heading > span { display:grid; place-items:center; width:44px; height:44px; border-radius:14px; background:#fff; color:var(--green); }
+.offers-shelf-heading h3 { font-size:23px; margin:0; }
+.offers-shelf-heading p { color:var(--muted); font-size:13px; }
+.offer-saving { color:#24478f; font-weight:600; font-size:12px; margin-block:8px; }
+.offers-shelf .product-card { background:#fff; box-shadow:0 5px 20px #24324b06; }
+@media(max-width:600px) { .offers-shelf { padding:16px; margin-inline:-8px; border-radius:16px; } .offers-shelf-heading h3 { font-size:20px; } }

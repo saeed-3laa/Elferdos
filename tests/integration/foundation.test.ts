@@ -856,3 +856,74 @@ describe("manual availability upgrade 028",()=>{
  it("still rejects an already-created legacy import batch",async()=>{await db.exec('reset role');const batch=(await db.query<{id:string}>("insert into public.import_batches(actor_id,kind,rows) values($1,'stock','[]') returning id",[ids.owner])).rows[0]!.id;await asUser(ids.owner);await expect(db.query('select public.apply_import($1)',[batch])).rejects.toThrow('INVENTORY_RETIRED');});
 
 });
+
+// Current timed-offer model, layered over all availability cleanups. Historical
+// tests above intentionally exercise earlier migration contracts in isolation.
+describe("timed offers without quantity tiers", () => {
+ const unit="30000000-0000-4000-8000-000000000001", category="10000000-0000-4000-8000-000000000001";
+ beforeEach(async()=>{
+  await db.exec("reset role");
+  for(const file of ["202610310028_manual_product_availability.sql","202610310029_partial_phone_search.sql","202610310030_manual_availability_cleanup.sql","20261104223757_timed_offers_without_quantity_tiers.sql","20261105195502_archive_pricing_rules.sql"])
+   await db.exec((await readFile("supabase/migrations/"+file,"utf8")).replace(/^begin;/,"").replace(/commit;\s*$/,""));
+  await db.exec("update public.products set available=true");
+ });
+ async function save(minimum=1,id:string|null=null,revision=0){
+  return db.query<{id:string}>("select public.save_pricing_rule($1,$2,'عرض اختباري',null,$3,null,null,$4,'percent',1000,now()-interval '1 day',now()+interval '1 day',true) id",[id,revision,product,minimum]);
+ }
+ it("searches Arabic product/category prefixes and unit codes without loading the catalog",async()=>{
+  await asUser(ids.owner);
+  expect((await db.query("select id from public.search_pricing_targets('product','مش')")).rows).toEqual([{id:product}]);
+  expect((await db.query("select id from public.search_pricing_targets('category','م')")).rows).toEqual([{id:category}]);
+  expect((await db.query("select id from public.search_pricing_targets('unit','DEMO-DR')")).rows).toEqual([{id:unit}]);
+  expect((await db.query("select * from public.search_pricing_targets('product','غير موجود')")).rows).toEqual([]);
+ });
+ it("keeps target suggestions capped and excludes archived products",async()=>{
+  await db.query("insert into public.products(sku,name,category_id,active) select 'SEARCH-'||n,'منتج بحث '||n,$1,true from generate_series(1,12) n",[category]);
+  await db.query("update public.products set archived_at=now() where id=$1",[product]);
+  await asUser(ids.owner);
+  expect((await db.query("select * from public.search_pricing_targets('product','منتج')")).rows).toHaveLength(8);
+  expect((await db.query("select * from public.search_pricing_targets('product','DEMO-DR')")).rows).toEqual([]);
+ });
+ for(const [role,id] of [["customer",ids.alice],["viewer",ids.viewer],["order staff",ids.staff]] as const)
+ it("denies direct target search to "+role+" even for empty input",async()=>{await asUser(id);await expect(db.query("select * from public.search_pricing_targets('category','')")).rejects.toThrow("FORBIDDEN");});
+ it("denies anonymous target searches",async()=>{await db.exec("set local role anon");await expect(db.query("select * from public.search_pricing_targets('product','م')")).rejects.toThrow("permission denied");});
+ it("rejects direct quantity tiers, null quantities, and stale revisions",async()=>{
+  await asUser(ids.owner);await db.exec("savepoint invalid_tier");await expect(save(5)).rejects.toThrow("QUANTITY_TIERS_RETIRED");await db.exec("rollback to savepoint invalid_tier");
+  await db.exec("savepoint invalid_null");await expect(db.query("select public.save_pricing_rule(null,0,'عرض',null,null,null,null,null,'percent',1000,now(),now()+interval '1 day',true)")).rejects.toThrow("QUANTITY_TIERS_RETIRED");await db.exec("rollback to savepoint invalid_null");
+  const id=(await save()).rows[0]!.id;await save(1,id,0);await expect(save(1,id,0)).rejects.toThrow("EDIT_CONFLICT");
+ });
+ it("still denies customer writes at the RPC boundary",async()=>{await asUser(ids.alice);await expect(save()).rejects.toThrow("FORBIDDEN");});
+ it("archives the offer without deleting it and restores it without applying the discount", async () => {
+  await asUser(ids.owner);
+  const id = (await save()).rows[0]!.id;
+  expect((await db.query("select price_piastres::int from public.browse_catalog('DEMO-DRINK')")).rows).toEqual([{price_piastres:21600}]);
+  await db.query("select public.archive_pricing_rule($1, 0, true)", [id]);
+  expect((await db.query("select active, archived_at is not null archived from public.pricing_rules where id=$1", [id])).rows).toEqual([{active:false, archived:true}]);
+  expect((await db.query("select price_piastres::int from public.browse_catalog('DEMO-DRINK')")).rows).toEqual([{price_piastres:24000}]);
+  await db.exec("savepoint archived_edit");
+  await expect(save(1, id, 1)).rejects.toThrow("archived_pricing_rule_is_inactive");
+  await db.exec("rollback to savepoint archived_edit");
+  await db.query("select public.archive_pricing_rule($1, 1, false)", [id]);
+  expect((await db.query("select active, archived_at from public.pricing_rules where id=$1", [id])).rows).toEqual([{active:false, archived_at:null}]);
+  await expect(db.query("select public.archive_pricing_rule($1, 1, true)", [id])).rejects.toThrow("EDIT_CONFLICT");
+ });
+ it("denies customer access to the offer archive RPC", async () => {
+  await asUser(ids.alice);
+  await expect(db.query("select public.archive_pricing_rule($1, 0, true)", [product])).rejects.toThrow("FORBIDDEN");
+ });
+ it("uses one best price for every quantity and ignores retained legacy tiers",async()=>{
+  await db.query("insert into public.pricing_rules(name,product_id,minimum_quantity,kind,value,starts_at,ends_at) values('شريحة قديمة',$1,5,'fixed',1,now()-interval '1 day',now()+interval '1 day')",[product]);
+  await asUser(ids.owner);await save();await db.exec("reset role");
+  for(const quantity of [1,5,100])expect((await db.query<{p:{price:number}}>("select private.best_price($1,$2,$3,now()) p",[ids.alice,unit,quantity])).rows[0]!.p.price).toBe(21600);
+  expect((await db.query("select minimum_quantity from public.pricing_rules where name='شريحة قديمة'")).rows).toEqual([{minimum_quantity:5}]);
+ });
+ it("promotes a category offer, without exposing private, future or expired rules",async()=>{
+  await db.query("insert into public.pricing_rules(name,category_id,customer_id,kind,value,starts_at,ends_at) values('عرض القسم',$1,null,'percent',2000,now()-interval '1 day',now()+interval '1 day'),('خاص',$1,$2,'fixed',100,now()-interval '1 day',now()+interval '1 day'),('قادم',$1,null,'fixed',1,now()+interval '1 day',now()+interval '2 days'),('انتهى',$1,null,'fixed',1,now()-interval '2 days',now()-interval '1 day')",[category,ids.alice]);
+  await db.exec("set local role anon");expect((await db.query("select sku,price_piastres::int from public.browse_catalog('',null,1)")).rows).toEqual([{sku:"DEMO-DRINK",price_piastres:19200}]);
+ });
+ it("keeps exclusive end timestamps and never stacks overlapping discounts",async()=>{
+  await db.query("insert into public.pricing_rules(name,product_id,kind,value,starts_at,ends_at) values('عشرون',$1,'percent',2000,'2030-01-01T00:00:00Z','2030-01-02T00:00:00Z'),('عشرة',$1,'percent',1000,'2030-01-01T00:00:00Z','2030-01-02T00:00:00Z')",[product]);
+  expect((await db.query<{p:{price:number}}>("select private.best_price(null,$1,50,'2030-01-01T00:00:00Z') p",[unit])).rows[0]!.p.price).toBe(19200);
+  expect((await db.query<{p:{price:number}}>("select private.best_price(null,$1,50,'2030-01-02T00:00:00Z') p",[unit])).rows[0]!.p.price).toBe(24000);
+ });
+});
