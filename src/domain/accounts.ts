@@ -24,4 +24,13 @@ export const addressSchema = z.object({
   notes: z.string().trim().max(1000),
   is_default: z.boolean(),
 });
-export type FormState = { error?: string; success?: string };
+export type FormState = { error?: string; success?: string; fieldErrors?: Record<string,string> };
+
+export function validationState(issues: readonly {path: readonly PropertyKey[]; message:string}[], error:string):FormState {
+  const fieldErrors: Record<string,string> = {};
+  for (const issue of issues) {
+    const field = issue.path[0];
+    if (typeof field === "string" && !Object.hasOwn(fieldErrors, field)) fieldErrors[field] = issue.message;
+  }
+  return { error: issues[0]?.message ?? error, fieldErrors };
+}

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { loginSchema, profileSchema, registrationSchema, type FormState } from "@/domain/accounts";
+import { loginSchema, profileSchema, registrationSchema, validationState, type FormState } from "@/domain/accounts";
 import { allowAuthAttempt } from "@/server/auth/rate-limit";
 import { createSessionClient } from "@/server/supabase/session";
 import { z } from "zod";
@@ -14,8 +14,8 @@ function values(form: FormData) {
 
 export async function loginAction(_state: FormState, form: FormData): Promise<FormState> {
   const parsed = loginSchema.safeParse(values(form));
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "راجع بيانات الدخول" };
-  let destination="/account";
+  if (!parsed.success) return validationState(parsed.error.issues, "راجع بيانات الدخول");
+  let destination=form.get("next")==="cart"?"/cart":"/account";
   try {
     if (!await allowAuthAttempt("login", parsed.data.phone)) return { error: "محاولات كثيرة لهذا الرقم. حاول بعد ربع ساعة." };
     const client = await createSessionClient(true);
@@ -48,7 +48,7 @@ export async function staffLoginAction(_state:FormState,form:FormData):Promise<F
 
 export async function registerAction(_state: FormState, form: FormData): Promise<FormState> {
   const parsed = registrationSchema.safeParse(values(form));
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "راجع بيانات التسجيل" };
+  if (!parsed.success) return validationState(parsed.error.issues, "راجع بيانات التسجيل");
   try {
     if (!await allowAuthAttempt("register", parsed.data.phone)) return { error: "محاولات تسجيل كثيرة لهذا الرقم. حاول بعد ساعة." };
     const client = await createSessionClient(true);
@@ -63,7 +63,7 @@ export async function registerAction(_state: FormState, form: FormData): Promise
       return { error: "تعذّر تحميل بيانات الحساب. تواصل مع إدارة المخزن قبل إعادة المحاولة." };
     }
   } catch { return { error: "خدمة التسجيل غير متاحة حاليًا. حاول بعد قليل." }; }
-  redirect("/account");
+  redirect(form.get("next")==="cart"?"/cart":"/account");
 }
 
 export async function logoutAction() {

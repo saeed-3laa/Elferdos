@@ -15,6 +15,7 @@ describe("quantity-independent timed offers", () => {
     expect(nextOfferDay("2028-02-29")).toBe("2028-03-01");
   });
   it("round-trips exclusive Cairo midnight without changing a saved duration", () => {
+    expect(offerDate("2026-11-04T21:59:59Z")).toBe("2026-11-04");
     expect(offerDate("2026-11-04T22:00:00Z")).toBe("2026-11-05");
     expect(offerDate("2026-11-05T22:00:00Z", true)).toBe("2026-11-05");
   });

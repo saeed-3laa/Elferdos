@@ -84,6 +84,20 @@ test("registers, persists profile changes, signs out, and signs in securely", as
   expect(await page.content()).not.toContain(identity.password);
 });
 
+test("resumes checkout after customer login", async ({page,identity})=>{
+ await identity.create();
+ await page.addInitScript(()=>{
+  if(!localStorage.getItem("ferdous-cart-v1"))localStorage.setItem("ferdous-cart-v1",JSON.stringify([{unit_id:"30000000-0000-4000-8000-000000000001",quantity:2,name:"منتج محفوظ",unit_name:"كرتونة"}]));
+ });
+ await page.goto("/cart");
+ await page.getByRole("link",{name:"تسجيل الدخول لاستكمال الطلب"}).click();
+ await page.getByLabel("رقم الموبايل",{exact:true}).filter({visible:true}).fill(identity.phone);
+ await page.getByLabel("كلمة المرور",{exact:true}).filter({visible:true}).fill(identity.password);
+ await page.getByRole("button",{name:"تسجيل الدخول",exact:true}).click();
+ await expect(page).toHaveURL(/\/cart$/);
+ await expect(page.getByRole("spinbutton",{name:"كمية منتج محفوظ كرتونة"})).toHaveValue("2");
+});
+
 test("manages saved addresses and rejects cross-customer RPCs", async ({ page, identity, admin, zone }) => {
   const ownerId = await identity.create();
   await login(page, identity);
